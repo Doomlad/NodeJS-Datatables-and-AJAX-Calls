@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h1= title
+  p Click the button below to head over to the demo page.
+  form(action='http://localhost:3000/users')
+    button(type='submit') >>> Click Me <<<

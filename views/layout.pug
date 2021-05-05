@@ -1,0 +1,96 @@
+doctype html
+html
+  head
+    title Lab 4 - Using Node.js!
+    //-link(rel='stylesheet', href='/stylesheets/style.css')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js')
+    script(type='text/javascript' charset='utf8' src='https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js')
+    link(rel='stylesheet' type='text/css' href='https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css')
+
+  body
+    head
+      script.
+        let datatable;
+        
+        // When document is fully loaded, execute
+        $(document).ready(function () {
+          // Part 1: Successfully instantiate your DataTable and modify your DataTables to disable searching of the ‘First Name’ column.
+          datatable = $('#users_display').DataTable({ 
+            "pageLength": 3, // Optionally, I set the page length to 3 so it's easier to view the form.
+            "columnDefs": [{ 
+              "searchable": false, 
+              "targets": 2 // Here we're disabling searching of the first name column.
+            }]
+          });
+           
+          // Attach click event to button and route to formSubmit function
+          $("#submit").on('click', formSubmit);
+        });
+
+        // Part 2: Helps to build the table, and is used in below function when iterated between each user
+        const generateRow = data => {
+          return `
+            <tr>
+              <td>
+                ${data.id}
+              </td>
+              <td>
+                ${data.email}
+              </td>
+              <td>
+                ${data.first_name}
+              </td>
+              <td>
+                ${data.last_name}
+              </td>
+              <td>
+                <img src=${data.avatar} alt="User avatar could not be retrieved. :(">
+              </td>
+            </tr>
+          `;
+        }
+
+        // Part 2: Create an AJAX Get request to the URL https://reqres.in/api/users, and loop through user data to create new rows
+        // (Handled by axios)
+
+        // Part 3: Function named FormSubmit
+        const formSubmit = event => {
+          event.preventDefault(); // Prevent default event from firing
+
+          // Create a json object that holds the email, first name, last name, and avatar of the user.
+          const data = {
+            email: $("#emailInput").val().trim(),
+            fname: $("#fnameInput").val().trim(),
+            lname: $("#lnameInput").val().trim(),
+            
+            // Dont send img tag here, only link
+            avatar: "<img src='https://source.unsplash.com/random/128x128' alt='User avatar could not be retrieved. :('>" 
+          }
+
+          // As explained in the lecture, we use the same fetch but for the method its now POST
+          fetch("https://reqres.in/api/users", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+          })
+          .then(response => response.json())
+          .then(json => {
+            datatable.row.add([
+              json.id,
+              json.email,
+              json.fname,
+              json.lname,
+              json.avatar
+            ]).draw(); // Add the appropriate rows then draw the table once again to show the new addition
+          })
+          .catch(error => { console.warn("Failed to post new user", error) }) // Error message
+
+          // Optionally, I clear the input fields here when the form submits since I haven't done validation for this lab. :P
+          $("#emailInput").val('');
+          $("#fnameInput").val('');
+          $("#lnameInput").val('');
+        }
+
+    block content
